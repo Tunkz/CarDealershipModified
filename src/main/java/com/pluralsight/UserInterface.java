@@ -9,7 +9,6 @@ public class UserInterface {
 
 
     public UserInterface() {
-
     }
 
     public void display() {
@@ -58,6 +57,9 @@ public class UserInterface {
                     break;
                 case "9":
                     processRemoveVehicleRequest();
+                    break;
+                case "10":
+                    processSaleOrLeaseVehicle();
                     break;
                 case "99":
                     System.out.println();
@@ -178,12 +180,52 @@ public class UserInterface {
         System.out.println("Please enter the vin number: ");
         int vinNo = Userinput.nextInt();
         Userinput.nextLine();
-        for (Vehicle v : dealership.getAllVehicles()){
-            if (v.getVin() == vinNo){
+        for (Vehicle v : dealership.getAllVehicles()) {
+            if (v.getVin() == vinNo) {
                 dealership.removeVehicle(v);
             }
         }
 
     }
+
+    public void processSaleOrLeaseVehicle() {
+        List<Vehicle> dealershipVehicles = dealership.getAllVehicles();
+        System.out.println("Please enter the date: ");
+        String date = Userinput.nextLine();
+
+        System.out.println("Please enter your name: ");
+        String customerName = Userinput.nextLine();
+
+        System.out.println("Please enter your email: ");
+        String customerEmail = Userinput.nextLine();
+
+        System.out.println("Please enter the vehicle ID type: ");
+        int vehicleVin = Userinput.nextInt();
+        Userinput.nextLine();
+        Vehicle ve = null;
+        for (Vehicle v : dealershipVehicles) {
+            if (vehicleVin == v.getVin()) {
+                ve = v;
+            }
+        }
+        System.out.println("Would you like to lease/buy the Vehicle? ");
+        String userInput = Userinput.nextLine();
+        Contract contract = null;
+        if (userInput.equalsIgnoreCase("lease")) {
+            contract = new LeaseContract(date, customerName, customerEmail, ve);
+        } else if (userInput.equalsIgnoreCase("buy")) {
+            System.out.println("Would you like to finance the vehicle? ");
+            boolean financing = Userinput.nextBoolean();
+            contract = new SalesContract(date, customerName, customerEmail, ve, financing);
+        }
+
+        ContractFileManager contractFileManager = new ContractFileManager();
+        contractFileManager.saveContract(contract);
+        dealership.removeVehicle(ve);
+
+        DealerShipFileManager dealerShipFileManager = new DealerShipFileManager();
+        dealerShipFileManager.saveDealership(dealership);
+    }
+
 
 }
